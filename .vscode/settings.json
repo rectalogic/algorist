@@ -1,0 +1,11 @@
+{
+    "python.languageServer": "Pylance",
+    "python.formatting.provider": "black",
+    "source.organizeImports": true,
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    }
+}

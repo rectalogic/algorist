@@ -1,0 +1,9 @@
+[project]
+name = "algorist"
+version = "0.0.1"
+
+[tool.black]
+target-version = ["py39"]
+
+[tool.isort]
+profile = "black"

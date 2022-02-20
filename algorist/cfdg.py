@@ -1,8 +1,10 @@
 from __future__ import annotations
-from contextlib import contextmanager
+
 import functools
 import logging
 import typing as ta
+from contextlib import contextmanager
+
 import bpy
 from mathutils import Color, Matrix, Vector
 
@@ -104,10 +106,7 @@ class Context:
 
     def cube(self):
         # XXX make this generic, support user defined construction too
-        location, rotation, scale = self._matrix.decompose()
-        bpy.ops.mesh.primitive_cube_add(
-            location=location,
-            rotation=rotation.to_euler(),
-            scale=scale,
-        )
-        self._assign_color(bpy.context.object)
+        bpy.ops.mesh.primitive_cube_add()
+        cube = bpy.context.object
+        cube.matrix_world = self._matrix
+        self._assign_color(cube)
