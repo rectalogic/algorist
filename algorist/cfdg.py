@@ -29,7 +29,7 @@ class Context:
         self._mesh_cache: dict[
             tuple[str, ta.Any], tuple[bpy.types.Mesh, tuple[bpy.types.Collection, ...]]
         ] = {}
-        self._rules = {}
+        self._rules: dict[str, list[tuple[float, ta.Callable]]] = {}
 
     def limit(self, max_depth=12, max_objects=10000):
         def decorator(func):
@@ -138,6 +138,9 @@ class Context:
         self._color = current_color
 
     def _assign_color(self, obj: bpy.types.Object):
+        if not self._color:
+            return
+
         color = (*colorsys.hsv_to_rgb(*self._color[:3]), self._color[3])
         material = bpy.data.materials.new("Color")
         material.use_nodes = True
@@ -152,7 +155,7 @@ class Context:
     def shape(self, name: str, shapefunc, **kwargs):
         meshkey = (name, tuple(sorted(kwargs.items())))
         mesh, collections = self._mesh_cache.get(meshkey, (None, None))
-        if mesh:
+        if mesh and collections is not None:
             shape = bpy.data.objects.new(name, mesh.copy())
             for c in collections:
                 c.objects.link(shape)
@@ -161,8 +164,7 @@ class Context:
             shape = bpy.context.object
             self._mesh_cache[meshkey] = (shape.data.copy(), shape.users_collection)
         shape.matrix_world = self._matrix
-        if self._color:
-            self._assign_color(shape)
+        self._assign_color(shape)
 
     def torus(self, major_radius: float = 1.0, minor_radius: float = 0.25):
         self.shape(

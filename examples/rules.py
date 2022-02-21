@@ -24,7 +24,7 @@ def rule1():
         ctx.icosphere(radius=0.25)
 
 
-@ctx.rule()
+@ctx.rule()  # type: ignore[no-redef]
 @limit
 def rule1():
     # { x 0.9 rz -6 ry 6 s 0.99  sat 0.99  } R1
