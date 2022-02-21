@@ -3,6 +3,8 @@ from __future__ import annotations
 import colorsys
 import functools
 import logging
+import math
+import random
 import typing as ta
 from contextlib import contextmanager
 
@@ -27,6 +29,7 @@ class Context:
         self._mesh_cache: dict[
             tuple[str, ta.Any], tuple[bpy.types.Mesh, tuple[bpy.types.Collection, ...]]
         ] = {}
+        self._rules = {}
 
     def limit(self, max_depth=12, max_objects=10000):
         def decorator(func):
@@ -53,6 +56,31 @@ class Context:
             return wrapper
 
         return decorator
+
+    def rule(self, weight=1.0):
+        def decorator(func):
+            name = func.__name__
+
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs):
+                return self._invoke_rule(name, *args, **kwargs)
+
+            if name not in self._rules:
+                self._rules[name] = []
+                last_weight = 0
+            else:
+                last_weight = self._rules[name][-1][0]
+            self._rules[name].append((last_weight + weight, func))
+
+            return wrapper
+
+        return decorator
+
+    def _invoke_rule(self, name: str, *args, **kwargs):
+        rules = self._rules[name]
+        return random.choices(
+            [rule[1] for rule in rules], cum_weights=[rule[0] for rule in rules]
+        )[0](*args, **kwargs)
 
     @contextmanager
     def scale(
@@ -90,19 +118,22 @@ class Context:
         saturation: ta.Optional[float] = None,
         value: ta.Optional[float] = None,
         alpha: ta.Optional[float] = None,
+        color: ta.Optional[tuple[float, float, float, float]] = None,
     ):
-        if self._color is None:
-            self._color = (0.0, 0.0, 0.0, 1.0)
-        color = (
-            self._color[0] if hue is None else clamp(self._color[0] + hue),
+        if color:
+            self._color = color
+        elif self._color is None:
+            return
+        new_color = (
+            self._color[0] if hue is None else math.modf(self._color[0] + hue)[0],
             self._color[1]
             if saturation is None
-            else clamp(self._color[1] + saturation),
-            self._color[2] if value is None else clamp(self._color[2] + value),
-            self._color[3] if alpha is None else clamp(self._color[3] + alpha),
+            else clamp(self._color[1] * saturation),
+            self._color[2] if value is None else clamp(self._color[2] * value),
+            self._color[3] if alpha is None else clamp(self._color[3] * alpha),
         )
         current_color = self._color
-        self._color = color
+        self._color = new_color
         yield
         self._color = current_color
 
