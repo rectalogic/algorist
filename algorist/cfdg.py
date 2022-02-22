@@ -122,6 +122,10 @@ class Context:
         yield
         self._matrix = matrix
 
+    @property
+    def color_rgba(self) -> tuple[float, float, float, float]:
+        return (*colorsys.hsv_to_rgb(*self._color[:3]), self._color[3])
+
     @contextmanager
     def color(
         self,
@@ -153,7 +157,7 @@ class Context:
         if not self._color:
             return
 
-        color = (*colorsys.hsv_to_rgb(*self._color[:3]), self._color[3])
+        color = self.color_rgba
         material = bpy.data.materials.new("Color")
         material.use_nodes = True
         material.node_tree.nodes["Principled BSDF"].inputs[
