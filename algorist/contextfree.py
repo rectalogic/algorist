@@ -12,6 +12,8 @@ import bpy
 from bl_math import clamp
 from mathutils import Matrix, Vector
 
+from .blender import create_color_material
+
 if ta.TYPE_CHECKING:
     import bpy.types
 
@@ -153,21 +155,6 @@ class Context:
         yield
         self._color = current_color
 
-    def _assign_color(self, obj: bpy.types.Object):
-        if not self._color:
-            return
-
-        color = self.color_rgba
-        material = bpy.data.materials.new("Color")
-        material.use_nodes = True
-        material.node_tree.nodes["Principled BSDF"].inputs[
-            "Base Color"
-        ].default_value = color
-        material.diffuse_color = color
-        if self._color[3] < 1:
-            material.blend_method = "BLEND"
-        obj.data.materials.append(material)
-
     def shape(self, name: str, shapefunc, **kwargs) -> bpy.types.Object:
         meshkey = (name, tuple(sorted(kwargs.items())))
         mesh, collections = self._mesh_cache.get(meshkey, (None, None))
@@ -180,7 +167,9 @@ class Context:
             shape = bpy.context.object
             self._mesh_cache[meshkey] = (shape.data.copy(), shape.users_collection)
         shape.matrix_world = self._matrix
-        self._assign_color(shape)
+        if self._color:
+            material = create_color_material(self.color_rgba)
+            shape.data.materials.append(material)
         return shape
 
     def torus(
