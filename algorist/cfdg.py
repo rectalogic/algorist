@@ -31,7 +31,12 @@ class Context:
         ] = {}
         self._rules: dict[str, list[tuple[float, ta.Callable]]] = {}
 
-    def limit(self, max_depth=12, max_objects=10000):
+    def limit(
+        self,
+        max_depth: int = 12,
+        max_objects: int = 10000,
+        min_scale: ta.Optional[float] = None,
+    ):
         def decorator(func):
             depth = 0
             objects = 0
@@ -49,7 +54,13 @@ class Context:
                         log.warning("Max objects exceeded")
                         result = None
                     else:
-                        result = func(*args, **kwargs)
+                        if min_scale is not None and any(
+                            (s <= min_scale for s in self._matrix.to_scale())
+                        ):
+                            log.warning("Min scale exceeded")
+                            result = None
+                        else:
+                            result = func(*args, **kwargs)
                 depth -= 1
                 return result
 
@@ -123,6 +134,7 @@ class Context:
         if color:
             self._color = color
         elif self._color is None:
+            yield
             return
         new_color = (
             self._color[0] if hue is None else math.modf(self._color[0] + hue)[0],
@@ -152,7 +164,7 @@ class Context:
             material.blend_method = "BLEND"
         obj.data.materials.append(material)
 
-    def shape(self, name: str, shapefunc, **kwargs):
+    def shape(self, name: str, shapefunc, **kwargs) -> bpy.types.Object:
         meshkey = (name, tuple(sorted(kwargs.items())))
         mesh, collections = self._mesh_cache.get(meshkey, (None, None))
         if mesh and collections is not None:
@@ -165,9 +177,12 @@ class Context:
             self._mesh_cache[meshkey] = (shape.data.copy(), shape.users_collection)
         shape.matrix_world = self._matrix
         self._assign_color(shape)
+        return shape
 
-    def torus(self, major_radius: float = 1.0, minor_radius: float = 0.25):
-        self.shape(
+    def torus(
+        self, major_radius: float = 1.0, minor_radius: float = 0.25
+    ) -> bpy.types.Object:
+        return self.shape(
             "Torus",
             bpy.ops.mesh.primitive_torus_add,
             major_radius=major_radius,
@@ -175,22 +190,24 @@ class Context:
         )
 
     def plane(self, size: float = 2.0):
-        self.shape(
+        return self.shape(
             "Plane",
             bpy.ops.mesh.primitive_plane_add,
             size=size,
         )
 
-    def icosphere(self, radius: float = 1.0, subdivisions: int = 2):
-        self.shape(
+    def icosphere(self, radius: float = 1.0, subdivisions: int = 2) -> bpy.types.Object:
+        return self.shape(
             "IcoSphere",
             bpy.ops.mesh.primitive_ico_sphere_add,
             radius=radius,
             subdivisions=subdivisions,
         )
 
-    def uvsphere(self, radius: float = 1.0, segments: int = 32, ring_count: int = 16):
-        self.shape(
+    def uvsphere(
+        self, radius: float = 1.0, segments: int = 32, ring_count: int = 16
+    ) -> bpy.types.Object:
+        return self.shape(
             "UVSphere",
             bpy.ops.mesh.primitive_uv_sphere_add,
             radius=radius,
@@ -199,22 +216,24 @@ class Context:
         )
 
     def grid(self, size: float = 2.0):
-        self.shape(
+        return self.shape(
             "Grid",
             bpy.ops.mesh.primitive_grid_add,
             size=size,
         )
 
-    def cylinder(self, radius: float = 1.0, depth: float = 2.0):
-        self.shape(
+    def cylinder(self, radius: float = 1.0, depth: float = 2.0) -> bpy.types.Object:
+        return self.shape(
             "Cylinder",
             bpy.ops.mesh.primitive_cylinder_add,
             radius=radius,
             depth=depth,
         )
 
-    def cone(self, radius1: float = 1.0, radius2: float = 0.0, depth: float = 2.0):
-        self.shape(
+    def cone(
+        self, radius1: float = 1.0, radius2: float = 0.0, depth: float = 2.0
+    ) -> bpy.types.Object:
+        return self.shape(
             "Cone",
             bpy.ops.mesh.primitive_cone_add,
             radius1=radius1,
@@ -222,12 +241,19 @@ class Context:
             depth=depth,
         )
 
-    def circle(self, radius: float = 1.0):
-        self.shape("Circle", bpy.ops.mesh.primitive_circle_add, radius=radius)
+    def circle(
+        self, radius: float = 1.0, fill_type: str = "NOTHING"
+    ) -> bpy.types.Object:
+        return self.shape(
+            "Circle",
+            bpy.ops.mesh.primitive_circle_add,
+            radius=radius,
+            fill_type=fill_type,
+        )
 
     # XXX make this generic, support user defined construction too
-    def cube(self, size: tuple[float, float, float] = (1, 1, 1)):
+    def cube(self, size: tuple[float, float, float] = (1, 1, 1)) -> bpy.types.Object:
         # scale is baked into the vertices, (1,1,1) is a 2x2x2 cube
-        self.shape(
+        return self.shape(
             "Cube", bpy.ops.mesh.primitive_cube_add, scale=tuple(s * 0.5 for s in size)
         )
