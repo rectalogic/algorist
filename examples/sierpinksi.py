@@ -8,41 +8,29 @@ from algorist import Context
 ctx = Context(background_color=(0.025, 0.862, 0.193, 1))
 
 side = 2
+height = side * (sqrt(3) / 2)
 
 
-def shape():
-    # Cone pivot/center point is wrong, so transform the mesh
-    obj = ctx.cone(radius1=side / 2, depth=side * (sqrt(3) / 2))
-    matrix_world = obj.matrix_world.copy()
-    obj.matrix_world = Matrix.Identity(4)
-    obj.data.transform(Matrix.Translation((0, 0, 0.29)))
-    obj.matrix_world = matrix_world
+@ctx.limit(max_depth=6)
+def sierpinksi(depth=0):
+    with ctx.color(hue=0.008, saturation=1.3, value=1.2), ctx.scale(xyz=0.5):
+        with ctx.translate(x=0, y=-(height - (side / 2)) / 2, z=height):
+            sierpinksi(depth + 1)
+        with ctx.translate(x=0, y=height - (side / 2), z=0):
+            sierpinksi(depth + 1)
+        with ctx.translate(x=-side / 2, y=-side / 2, z=-0):
+            sierpinksi(depth + 1)
+        with ctx.translate(x=side / 2, y=-side / 2, z=0):
+            sierpinksi(depth + 1)
+
+    if depth > 3:
+        ctx.cone(radius1=side / 2, depth=height)
 
 
-def cone():
-    with ctx.translate(y=-side), ctx.scale(xyz=0.5):
-        sierpinksi()
-
-
-@ctx.limit(min_scale=0.009)
-def sierpinksi():
-    shape()
-
-    with ctx.color(hue=0.008, saturation=1.3, value=1.2):
-        with ctx.rotate(angle=radians(120), axis="X"):
-            cone()
-            with ctx.rotate(angle=radians(120), axis="X"):
-                cone()
-                with ctx.rotate(angle=radians(120), axis="X"):
-                    cone()
-
-
-with ctx.color(color=(0.048, 0.5, 0.3, 1)), ctx.scale(xyz=2), ctx.rotate(
-    radians(60), axis="X"
-):
+with ctx.color(color=(0.048, 0.5, 0.3, 1)), ctx.scale(xyz=2):
     sierpinksi()
 
-with ctx.color(color=(0.114, 0.77, 0.8, 1)), ctx.translate(z=-7):
+with ctx.color(color=(0.114, 0.77, 0.8, 1)), ctx.translate(z=-1):
     ctx.circle(radius=100, fill_type="NGON")
 
 bpy.context.scene.camera.matrix_world = Matrix(

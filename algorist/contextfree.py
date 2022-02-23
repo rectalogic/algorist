@@ -23,11 +23,10 @@ class Context:
     def __init__(
         self,
         matrix: ta.Optional[Matrix] = None,
-        color: ta.Optional[tuple[float, float, float, float]] = None,
         background_color: ta.Optional[tuple[float, float, float, float]] = None,
     ):
         self._matrix = matrix or Matrix()
-        self._color = color
+        self._color = None
         self._mesh_cache: dict[tuple[str, tuple], bpy.types.Mesh] = {}
         self._rules: dict[str, list[tuple[float, ta.Callable]]] = {}
         if background_color:
@@ -157,7 +156,9 @@ class Context:
         yield
         self._color = current_color
 
-    def shape(self, name: str, shapefunc, **kwargs) -> bpy.types.Object:
+    def shape(
+        self, name: str, shapefunc, create_material: bool = True, **kwargs
+    ) -> bpy.types.Object:
         meshkey = (name, tuple(sorted(kwargs.items())))
         mesh = self._mesh_cache.get(meshkey)
         if mesh:
@@ -168,38 +169,50 @@ class Context:
             shape = bpy.context.object
             self._mesh_cache[meshkey] = shape.data.copy()
         shape.matrix_world = self._matrix
-        if self._color:
+        if self._color and create_material:
             material = create_color_material(self.color_rgba)
             shape.data.materials.append(material)
         return shape
 
     def torus(
-        self, major_radius: float = 1.0, minor_radius: float = 0.25
+        self,
+        major_radius: float = 1.0,
+        minor_radius: float = 0.25,
+        create_material: bool = True,
     ) -> bpy.types.Object:
         return self.shape(
             "Torus",
             bpy.ops.mesh.primitive_torus_add,
             major_radius=major_radius,
             minor_radius=minor_radius,
+            create_material=create_material,
         )
 
-    def plane(self, size: float = 2.0):
+    def plane(self, size: float = 2.0, create_material: bool = True):
         return self.shape(
             "Plane",
             bpy.ops.mesh.primitive_plane_add,
             size=size,
+            create_material=create_material,
         )
 
-    def icosphere(self, radius: float = 1.0, subdivisions: int = 2) -> bpy.types.Object:
+    def icosphere(
+        self, radius: float = 1.0, subdivisions: int = 2, create_material: bool = True
+    ) -> bpy.types.Object:
         return self.shape(
             "IcoSphere",
             bpy.ops.mesh.primitive_ico_sphere_add,
             radius=radius,
             subdivisions=subdivisions,
+            create_material=create_material,
         )
 
     def uvsphere(
-        self, radius: float = 1.0, segments: int = 32, ring_count: int = 16
+        self,
+        radius: float = 1.0,
+        segments: int = 32,
+        ring_count: int = 16,
+        create_material: bool = True,
     ) -> bpy.types.Object:
         return self.shape(
             "UVSphere",
@@ -207,25 +220,34 @@ class Context:
             radius=radius,
             segments=segments,
             ring_count=ring_count,
+            create_material=create_material,
         )
 
-    def grid(self, size: float = 2.0):
+    def grid(self, size: float = 2.0, create_material: bool = True):
         return self.shape(
             "Grid",
             bpy.ops.mesh.primitive_grid_add,
             size=size,
+            create_material=create_material,
         )
 
-    def cylinder(self, radius: float = 1.0, depth: float = 2.0) -> bpy.types.Object:
+    def cylinder(
+        self, radius: float = 1.0, depth: float = 2.0, create_material: bool = True
+    ) -> bpy.types.Object:
         return self.shape(
             "Cylinder",
             bpy.ops.mesh.primitive_cylinder_add,
             radius=radius,
             depth=depth,
+            create_material=create_material,
         )
 
     def cone(
-        self, radius1: float = 1.0, radius2: float = 0.0, depth: float = 2.0
+        self,
+        radius1: float = 1.0,
+        radius2: float = 0.0,
+        depth: float = 2.0,
+        create_material: bool = True,
     ) -> bpy.types.Object:
         return self.shape(
             "Cone",
@@ -233,21 +255,30 @@ class Context:
             radius1=radius1,
             radius2=radius2,
             depth=depth,
+            create_material=create_material,
         )
 
     def circle(
-        self, radius: float = 1.0, fill_type: str = "NOTHING"
+        self,
+        radius: float = 1.0,
+        fill_type: str = "NOTHING",
+        create_material: bool = True,
     ) -> bpy.types.Object:
         return self.shape(
             "Circle",
             bpy.ops.mesh.primitive_circle_add,
             radius=radius,
             fill_type=fill_type,
+            create_material=create_material,
         )
 
-    # XXX make this generic, support user defined construction too
-    def cube(self, size: tuple[float, float, float] = (1, 1, 1)) -> bpy.types.Object:
+    def cube(
+        self, size: tuple[float, float, float] = (1, 1, 1), create_material: bool = True
+    ) -> bpy.types.Object:
         # scale is baked into the vertices, (1,1,1) is a 2x2x2 cube
         return self.shape(
-            "Cube", bpy.ops.mesh.primitive_cube_add, scale=tuple(s * 0.5 for s in size)
+            "Cube",
+            bpy.ops.mesh.primitive_cube_add,
+            scale=tuple(s * 0.5 for s in size),
+            create_material=create_material,
         )
