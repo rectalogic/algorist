@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import colorsys
 import functools
 import logging
 import math
@@ -12,7 +11,7 @@ import bpy
 from bl_math import clamp
 from mathutils import Matrix, Vector
 
-from .blender import create_color_material
+from .blender import create_color_material, hsva_to_rgba
 
 if ta.TYPE_CHECKING:
     import bpy.types
@@ -25,13 +24,16 @@ class Context:
         self,
         matrix: ta.Optional[Matrix] = None,
         color: ta.Optional[tuple[float, float, float, float]] = None,
+        background_color: ta.Optional[tuple[float, float, float, float]] = None,
     ):
         self._matrix = matrix or Matrix()
         self._color = color
-        self._mesh_cache: dict[
-            tuple[str, ta.Any], tuple[bpy.types.Mesh, tuple[bpy.types.Collection, ...]]
-        ] = {}
+        self._mesh_cache: dict[tuple[str, tuple], bpy.types.Mesh] = {}
         self._rules: dict[str, list[tuple[float, ta.Callable]]] = {}
+        if background_color:
+            bpy.context.scene.world.node_tree.nodes["Background"].inputs[
+                "Color"
+            ].default_value = hsva_to_rgba(background_color)
 
     def limit(
         self,
@@ -126,7 +128,7 @@ class Context:
 
     @property
     def color_rgba(self) -> tuple[float, float, float, float]:
-        return (*colorsys.hsv_to_rgb(*self._color[:3]), self._color[3])
+        return hsva_to_rgba(self._color)
 
     @contextmanager
     def color(
@@ -157,15 +159,14 @@ class Context:
 
     def shape(self, name: str, shapefunc, **kwargs) -> bpy.types.Object:
         meshkey = (name, tuple(sorted(kwargs.items())))
-        mesh, collections = self._mesh_cache.get(meshkey, (None, None))
-        if mesh and collections is not None:
+        mesh = self._mesh_cache.get(meshkey)
+        if mesh:
             shape = bpy.data.objects.new(name, mesh.copy())
-            for c in collections:
-                c.objects.link(shape)
+            bpy.context.collection.objects.link(shape)
         else:
             shapefunc(**kwargs)
             shape = bpy.context.object
-            self._mesh_cache[meshkey] = (shape.data.copy(), shape.users_collection)
+            self._mesh_cache[meshkey] = shape.data.copy()
         shape.matrix_world = self._matrix
         if self._color:
             material = create_color_material(self.color_rgba)

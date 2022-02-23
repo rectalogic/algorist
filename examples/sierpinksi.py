@@ -5,7 +5,7 @@ from mathutils import Matrix
 
 from algorist import Context
 
-ctx = Context()
+ctx = Context(background_color=(0.025, 0.862, 0.193, 1))
 
 side = 2
 
@@ -42,8 +42,8 @@ with ctx.color(color=(0.048, 0.5, 0.3, 1)), ctx.scale(xyz=2), ctx.rotate(
 ):
     sierpinksi()
 
-with ctx.color(color=(0, 0, 0.8, 1)), ctx.translate(z=-7):
-    ctx.plane(size=100)
+with ctx.color(color=(0.114, 0.77, 0.8, 1)), ctx.translate(z=-7):
+    ctx.circle(radius=100, fill_type="NGON")
 
 bpy.context.scene.camera.matrix_world = Matrix(
     (
