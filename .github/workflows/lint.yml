@@ -11,8 +11,4 @@ jobs:
     - name: Run Checks
       run: |
         ./dev-setup.sh
-        venv/bin/black --check --diff .
-        venv/bin/isort --check --diff .
-        # Type hints are incorrect in fake-bpy
-        venv/bin/pip uninstall -y fake-bpy-module-3.0
-        venv/bin/mypy .
+        ./lint.sh

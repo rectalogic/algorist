@@ -26,7 +26,7 @@ class Context:
         background_color: ta.Optional[tuple[float, float, float, float]] = None,
     ):
         self._matrix = matrix or Matrix()
-        self._color = None
+        self._color = (0.0, 0.0, 1.0, 1.0)
         self._mesh_cache: dict[tuple[str, tuple], bpy.types.Mesh] = {}
         self._rules: dict[str, list[tuple[float, ta.Callable]]] = {}
         if background_color:
@@ -140,9 +140,6 @@ class Context:
     ):
         if color:
             self._color = color
-        elif self._color is None:
-            yield
-            return
         new_color = (
             self._color[0] if hue is None else math.modf(self._color[0] + hue)[0],
             self._color[1]
@@ -169,7 +166,7 @@ class Context:
             shape = bpy.context.object
             self._mesh_cache[meshkey] = shape.data.copy()
         shape.matrix_world = self._matrix
-        if self._color and create_material:
+        if create_material:
             material = create_color_material(self.color_rgba)
             shape.data.materials.append(material)
         return shape

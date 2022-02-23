@@ -10,3 +10,11 @@ profile = "black"
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Type hints are incorrect in fake-bpy, so exclude
+module = [
+    "bpy",
+    "mathutils",
+]
+follow_imports = "skip"
