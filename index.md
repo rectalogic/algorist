@@ -4,6 +4,8 @@ title: Algorist
 
 # Algorist
 
-{% for image in site.renders %}
-     <img src="{{ image.url }}" />
+{% assign renders = site.static_files | where: "render", true %}
+{% for render in renders %}
+  <img src="{{ site.baseurl }}{{ render.path }}" />
 {% endfor %}
+

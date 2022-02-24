@@ -4,5 +4,8 @@ plugins:
 title: "Algorist"
 description: "Algorithmic art generation in Blender"
 show_downloads: false
-collections:
-- renders
+defaults:
+  - scope:
+      path: "renders"
+    values:
+      render: true
