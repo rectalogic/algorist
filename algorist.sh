@@ -3,7 +3,7 @@
 set -e
 
 function usage {
-    echo "Usage: $(basename $0) [-b INITIAL.blend] SCRIPT.py" 2>&1
+    echo "Usage: $(basename $0) [-b INITIAL.blend] SCRIPT.py [... blender args]" 2>&1
     echo '   -b INITIAL.blend   initial blend file, defaults to algorist.blend'
     echo '   SCRIPT.py          python script to run'
     exit 1
@@ -40,9 +40,10 @@ while getopts ${optstring} arg; do
     esac
 done
 shift $(($OPTIND - 1))
-if [[ ${#} -ne 1 ]]; then
+if [[ ${#} -eq 0 ]]; then
     usage
 fi
 SOURCE_PATH="$(cd "$(dirname "$1")"; pwd -P)/$(basename "$1")"
+shift
 
-"$BLENDER" "${BLEND:-$SCRIPT_DIR/algorist.blend}" --python "$SOURCE_PATH"
+"$BLENDER" "${BLEND:-$SCRIPT_DIR/algorist.blend}" --python "$SOURCE_PATH" "${@}"
