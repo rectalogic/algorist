@@ -1,0 +1,34 @@
+name: Render
+on: [push]
+
+jobs:
+  render:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 30
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Install Blender
+      run: |
+        sudo snap install blender --channel=3.0/stable --classic
+    - name: Render
+      run: |
+        mkdir /tmp/renders
+        for py in examples/*.py; do
+          hash=$(sha1sum $py | cut -d ' ' -f 1)
+          ./algorist.sh $py --python .github/workflows/resolution.py --background --engine CYCLES --render-format PNG --use-extension 1 --render-output "/tmp/renders/$(basename $py).#.$hash" --render-frame 1 -- --cycles-device CPU
+        done
+    - name: Upload renders
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git checkout gh-pages
+        git clean -d -f
+        # Copy images unless they already exist (don't want to re-render images that have randomized contents)
+        rsync --recursive --ignore-existing --delete /tmp/renders/ renders/
+        git add renders
+        if git commit -m "new renders"; then
+          git push
+        fi
