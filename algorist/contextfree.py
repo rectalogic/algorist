@@ -159,16 +159,21 @@ class Context:
         meshkey = (name, tuple(sorted(kwargs.items())))
         mesh = self._mesh_cache.get(meshkey)
         if mesh:
-            shape = bpy.data.objects.new(name, mesh.copy())
+            shape = bpy.data.objects.new(name, mesh)
             bpy.context.collection.objects.link(shape)
         else:
             shapefunc(**kwargs)
             shape = bpy.context.object
-            self._mesh_cache[meshkey] = shape.data.copy()
+            # Create an empty material slot
+            if create_material:
+                shape.data.materials.append(None)
+            self._mesh_cache[meshkey] = shape.data
         shape.matrix_world = self._matrix
         if create_material:
             material = create_color_material(self.color_rgba)
-            shape.data.materials.append(material)
+            # Link the material to the new object, not the shared mesh data
+            shape.material_slots[0].link = "OBJECT"
+            shape.material_slots[0].material = material
         return shape
 
     def torus(
