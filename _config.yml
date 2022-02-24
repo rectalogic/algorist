@@ -1,1 +1,8 @@
-name: "Algorist"
+remote_theme: pages-themes/cayman@v0.2.0
+plugins:
+- jekyll-remote-theme
+title: "Algorist"
+description: "Algorithmic art generation in Blender"
+show_downloads: false
+collections:
+- renders
