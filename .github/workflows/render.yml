@@ -1,5 +1,8 @@
 name: Render
-on: [push]
+on:
+  push:
+    branches:
+      - "master"
 
 jobs:
   render:
