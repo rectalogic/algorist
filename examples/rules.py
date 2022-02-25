@@ -7,7 +7,7 @@ import logging
 import bpy
 from mathutils import Matrix
 
-from algorist import Context
+from algorist import Context, rule
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ xfm = ctx.transform
 limit = ctx.limit(max_depth=50)
 
 
-@ctx.rule()
+@rule()
 @limit
 def rule1():
     # { x 0.9 rz 6 ry 6 s 0.99  sat 0.99  } R1
@@ -28,7 +28,7 @@ def rule1():
         xfm.apply(ctx.mesh.icosphere(radius=0.25))
 
 
-@ctx.rule()  # type: ignore[no-redef]
+@rule()  # type: ignore[no-redef]
 @limit
 def rule1():  # noqa: F811
     # { x 0.9 rz -6 ry 6 s 0.99  sat 0.99  } R1

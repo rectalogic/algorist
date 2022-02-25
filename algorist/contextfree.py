@@ -2,15 +2,11 @@ from __future__ import annotations
 
 import functools
 import logging
-import math
-import random
 import typing as ta
-from contextlib import contextmanager
 
 import bpy
-from mathutils import Matrix, Vector
 
-from .blender import create_color_material, hsva_to_rgba
+from .blender import hsva_to_rgba
 from .mesh_factory import MeshFactory
 from .transform import Transform
 
@@ -30,7 +26,7 @@ class Context:
     ):
         self._transform = transform or Transform()
         self._mesh_factory = MeshFactory()
-        self._rules: dict[str, list[tuple[float, ta.Callable]]] = {}
+
         if background_color:
             bpy.context.scene.world.node_tree.nodes["Background"].inputs[
                 "Color"
@@ -72,31 +68,6 @@ class Context:
             return wrapper
 
         return decorator
-
-    def rule(self, weight=1.0):
-        def decorator(func):
-            name = func.__name__
-
-            @functools.wraps(func)
-            def wrapper(*args, **kwargs):
-                return self._invoke_rule(name, *args, **kwargs)
-
-            if name not in self._rules:
-                self._rules[name] = []
-                last_weight = 0
-            else:
-                last_weight = self._rules[name][-1][0]
-            self._rules[name].append((last_weight + weight, func))
-
-            return wrapper
-
-        return decorator
-
-    def _invoke_rule(self, name: str, *args, **kwargs):
-        rules = self._rules[name]
-        return random.choices(
-            [rule[1] for rule in rules], cum_weights=[rule[0] for rule in rules]
-        )[0](*args, **kwargs)
 
     @property
     def transform(self) -> Transform:

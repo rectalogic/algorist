@@ -1,4 +1,4 @@
-from math import radians, sqrt
+from math import sqrt
 
 import bpy
 from mathutils import Matrix
