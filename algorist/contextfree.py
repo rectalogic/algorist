@@ -17,6 +17,8 @@ from .transform import Transform
 if ta.TYPE_CHECKING:
     import bpy.types
 
+    from .blender import Color
+
 log = logging.getLogger(__name__)
 
 
@@ -24,7 +26,7 @@ class Context:
     def __init__(
         self,
         transform: ta.Optional[Transform] = None,
-        background_color: ta.Optional[tuple[float, float, float, float]] = None,
+        background_color: ta.Optional[Color] = None,
     ):
         self._transform = transform or Transform()
         self._mesh_factory = MeshFactory()

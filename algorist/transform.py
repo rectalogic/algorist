@@ -10,12 +10,15 @@ from mathutils import Matrix, Vector
 
 from .blender import create_color_material, hsva_to_rgba
 
+if ta.TYPE_CHECKING:
+    from .blender import Color
+
 
 class Transform:
     def __init__(
         self,
         matrix: ta.Optional[Matrix] = None,
-        color: tuple[float, float, float, float] = (0.0, 0.0, 1.0, 1.0),
+        color: Color = (0.0, 0.0, 1.0, 1.0),
     ):
         self._matrix = matrix or Matrix()
         self._color = color
@@ -54,7 +57,7 @@ class Transform:
         return self._matrix
 
     @property
-    def color_rgba(self) -> tuple[float, float, float, float]:
+    def color_rgba(self) -> Color:
         return hsva_to_rgba(self._color)
 
     @contextmanager
@@ -64,7 +67,7 @@ class Transform:
         saturation: ta.Optional[float] = None,
         value: ta.Optional[float] = None,
         alpha: ta.Optional[float] = None,
-        color: ta.Optional[tuple[float, float, float, float]] = None,
+        color: ta.Optional[Color] = None,
     ):
         current_color = self._color
         base_color = color or self._color
