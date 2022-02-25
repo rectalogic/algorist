@@ -12,6 +12,7 @@ from algorist import Context
 log = logging.getLogger(__name__)
 
 ctx = Context()
+xfm = ctx.transform
 limit = ctx.limit(max_depth=50)
 
 
@@ -19,27 +20,27 @@ limit = ctx.limit(max_depth=50)
 @limit
 def rule1():
     # { x 0.9 rz 6 ry 6 s 0.99  sat 0.99  } R1
-    with ctx.color(saturation=0.99), ctx.scale(xyz=0.99), ctx.rotate(
+    with xfm.color(saturation=0.99), xfm.scale(xyz=0.99), xfm.rotate(
         6, "Y"
-    ), ctx.rotate(6, "Z"), ctx.translate(x=0.9):
+    ), xfm.rotate(6, "Z"), xfm.translate(x=0.9):
         rule1()
-    with ctx.scale(xyz=2):
-        ctx.icosphere(radius=0.25)
+    with xfm.scale(xyz=2):
+        xfm.apply(ctx.mesh.icosphere(radius=0.25))
 
 
 @ctx.rule()  # type: ignore[no-redef]
 @limit
 def rule1():
     # { x 0.9 rz -6 ry 6 s 0.99  sat 0.99  } R1
-    with ctx.color(saturation=0.99), ctx.scale(xyz=0.99), ctx.rotate(
+    with xfm.color(saturation=0.99), xfm.scale(xyz=0.99), xfm.rotate(
         6, "Y"
-    ), ctx.rotate(-6, "Z"), ctx.translate(x=0.9):
+    ), xfm.rotate(-6, "Z"), xfm.translate(x=0.9):
         rule1()
-    with ctx.scale(xyz=2):
-        ctx.icosphere(radius=0.25)
+    with xfm.scale(xyz=2):
+        xfm.apply(ctx.mesh.icosphere(radius=0.25))
 
 
-with ctx.color(color=(0, 1, 1, 1)):
+with xfm.color(color=(0, 1, 1, 1)):
     rule1()
 
 

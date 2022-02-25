@@ -9,25 +9,26 @@ from algorist import Context, prnd, rnd
 log = logging.getLogger(__name__)
 
 ctx = Context()
+xfm = ctx.transform
 
 
 @ctx.limit()
 def branch():
-    ctx.cylinder(radius=0.1, depth=1)
-    with ctx.translate(z=0.7), ctx.scale(xyz=0.7 + rnd(0.15)), ctx.color(value=0.8):
-        with ctx.rotate(axis="X", angle=radians(5 + prnd(30))):
+    xfm.apply(ctx.mesh.cylinder(radius=0.1, depth=1))
+    with xfm.translate(z=0.7), xfm.scale(xyz=0.7 + rnd(0.15)), xfm.color(value=0.8):
+        with xfm.rotate(axis="X", angle=radians(5 + prnd(30))):
             branch()
-        with ctx.rotate(axis="X", angle=radians(-5 - prnd(30))):
+        with xfm.rotate(axis="X", angle=radians(-5 - prnd(30))):
             branch()
 
 
-with ctx.scale(x=3, y=3, z=3), ctx.color(color=(0, 1, 1, 1)):
+with xfm.scale(x=3, y=3, z=3), xfm.color(color=(0, 1, 1, 1)):
     branch()
-    with ctx.rotate(axis="Z", angle=radians(90)):
+    with xfm.rotate(axis="Z", angle=radians(90)):
         branch()
 
-with ctx.color(color=(0, 0, 1, 1)):
-    ctx.plane(size=100)
+with xfm.color(color=(0, 0, 1, 1)):
+    xfm.apply(ctx.mesh.plane(size=100))
 
 bpy.context.scene.camera.matrix_world = Matrix(
     (
