@@ -1,5 +1,6 @@
 black~=22.1
 isort~=5.10
 fake-bpy-module-3.0==20211212
+Flake8-pyproject~=0.9
 flake8~=4.0
 mypy

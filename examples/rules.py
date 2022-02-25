@@ -30,7 +30,7 @@ def rule1():
 
 @ctx.rule()  # type: ignore[no-redef]
 @limit
-def rule1():
+def rule1():  # noqa: F811
     # { x 0.9 rz -6 ry 6 s 0.99  sat 0.99  } R1
     with xfm.color(saturation=0.99), xfm.scale(xyz=0.99), xfm.rotate(
         6, "Y"

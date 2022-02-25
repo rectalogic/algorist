@@ -18,3 +18,8 @@ module = [
     "mathutils",
 ]
 follow_imports = "skip"
+
+[tool.flake8]
+# https://github.com/PyCQA/pycodestyle/issues/373
+extend-ignore = "E203"
+max-line-length = 88
