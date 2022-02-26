@@ -4,7 +4,6 @@ on: [push]
 jobs:
   render:
     runs-on: ubuntu-20.04
-    timeout-minutes: 30
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -20,6 +19,9 @@ jobs:
         echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
     - name: Render
       run: |
+        if [ "$GIT_BRANCH" != "master" ]; then
+          sed -i -e s/640/80/ -e s/360/45/ .github/workflows/resolution.py
+        fi
         mkdir /tmp/renders
         for py in examples/*.py; do
           hash=$(sha1sum $py | cut -d ' ' -f 1)
