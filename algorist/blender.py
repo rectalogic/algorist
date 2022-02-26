@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import colorsys
+import functools
 import itertools
 import typing as ta
 
@@ -51,21 +52,23 @@ class MeshFactory:
             self._mesh_cache[meshkey] = obj.data
         return obj
 
-    def ops_primitive(self, primitive_func, *args, **kwargs) -> bpy.types.Object:
-        """Create a blender ops primitive
-
-        primitive_func should be one of:
-          bpy.ops.mesh.primitive_torus_add
-          bpy.ops.mesh.primitive_plane_add
-          bpy.ops.mesh.primitive_ico_sphere_add
-          bpy.ops.mesh.primitive_uv_sphere_add
-          bpy.ops.mesh.primitive_grid_add
-          bpy.ops.mesh.primitive_cylinder_add
-          bpy.ops.mesh.primitive_cone_add
-          bpy.ops.mesh.primitive_circle_add
-          bpy.ops.mesh.primitive_cube_add
-        """
-        return self.create(primitive_func.idname(), primitive_func, *args, **kwargs)
+    torus = functools.partialmethod(create, "Torus", bpy.ops.mesh.primitive_torus_add)
+    plane = functools.partialmethod(create, "Plane", bpy.ops.mesh.primitive_plane_add)
+    ico_sphere = functools.partialmethod(
+        create, "IcoSphere", bpy.ops.mesh.primitive_ico_sphere_add
+    )
+    uv_sphere = functools.partialmethod(
+        create, "UVSphere", bpy.ops.mesh.primitive_uv_sphere_add
+    )
+    grid = functools.partialmethod(create, "Grid", bpy.ops.mesh.primitive_grid_add)
+    cylinder = functools.partialmethod(
+        create, "Cylinder", bpy.ops.mesh.primitive_cylinder_add
+    )
+    cone = functools.partialmethod(create, "Cone", bpy.ops.mesh.primitive_cone_add)
+    circle = functools.partialmethod(
+        create, "Circle", bpy.ops.mesh.primitive_circle_add
+    )
+    cube = functools.partialmethod(create, "Cube", bpy.ops.mesh.primitive_cube_add)
 
 
 def create_color_material(color: Color) -> bpy.types.Material:

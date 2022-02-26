@@ -14,9 +14,7 @@ mf = MeshFactory()
 
 @limit()
 def branch():
-    xfm.apply(
-        mf.ops_primitive(bpy.ops.mesh.primitive_cylinder_add, radius=0.1, depth=1)
-    )
+    xfm.apply(mf.cylinder(radius=0.1, depth=1))
     with xfm.translate(z=0.7), xfm.scale(xyz=0.7 + rnd(0.15)), xfm.color(value=0.8):
         with xfm.rotate(axis="X", angle=radians(5 + prnd(30))):
             branch()
@@ -30,7 +28,7 @@ with xfm.scale(x=3, y=3, z=3), xfm.color(color=(0, 1, 1, 1)):
         branch()
 
 with xfm.color(color=(0, 0, 1, 1)):
-    xfm.apply(mf.ops_primitive(bpy.ops.mesh.primitive_plane_add, size=100))
+    xfm.apply(mf.plane(size=100))
 
 bpy.context.scene.camera.matrix_world = Matrix(
     (

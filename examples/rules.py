@@ -25,7 +25,7 @@ def rule1():
     ), xfm.rotate(6, "Z"), xfm.translate(x=0.9):
         rule1()
     with xfm.scale(xyz=2):
-        xfm.apply(mf.ops_primitive(bpy.ops.mesh.primitive_ico_sphere_add, radius=0.25))
+        xfm.apply(mf.ico_sphere(radius=0.25))
 
 
 @rule()  # type: ignore[no-redef]
@@ -37,7 +37,7 @@ def rule1():  # noqa: F811
     ), xfm.rotate(-6, "Z"), xfm.translate(x=0.9):
         rule1()
     with xfm.scale(xyz=2):
-        xfm.apply(mf.ops_primitive(bpy.ops.mesh.primitive_ico_sphere_add, radius=0.25))
+        xfm.apply(mf.ico_sphere(radius=0.25))
 
 
 with xfm.color(color=(0, 1, 1, 1)):
