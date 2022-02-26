@@ -7,17 +7,17 @@ import logging
 import bpy
 from mathutils import Matrix
 
-from algorist import Context, rule
+from algorist import MeshFactory, Transform, limit, rule
 
 log = logging.getLogger(__name__)
 
-ctx = Context()
-xfm = ctx.transform
-limit = ctx.limit(max_depth=50)
+limitdepth = limit(max_depth=50)
+xfm = Transform()
+mf = MeshFactory()
 
 
 @rule()
-@limit
+@limitdepth
 def rule1():
     # { x 0.9 rz 6 ry 6 s 0.99  sat 0.99  } R1
     with xfm.color(saturation=0.99), xfm.scale(xyz=0.99), xfm.rotate(
@@ -25,13 +25,11 @@ def rule1():
     ), xfm.rotate(6, "Z"), xfm.translate(x=0.9):
         rule1()
     with xfm.scale(xyz=2):
-        xfm.apply(
-            ctx.mesh.ops_primitive(bpy.ops.mesh.primitive_ico_sphere_add, radius=0.25)
-        )
+        xfm.apply(mf.ops_primitive(bpy.ops.mesh.primitive_ico_sphere_add, radius=0.25))
 
 
 @rule()  # type: ignore[no-redef]
-@limit
+@limitdepth
 def rule1():  # noqa: F811
     # { x 0.9 rz -6 ry 6 s 0.99  sat 0.99  } R1
     with xfm.color(saturation=0.99), xfm.scale(xyz=0.99), xfm.rotate(
@@ -39,9 +37,7 @@ def rule1():  # noqa: F811
     ), xfm.rotate(-6, "Z"), xfm.translate(x=0.9):
         rule1()
     with xfm.scale(xyz=2):
-        xfm.apply(
-            ctx.mesh.ops_primitive(bpy.ops.mesh.primitive_ico_sphere_add, radius=0.25)
-        )
+        xfm.apply(mf.ops_primitive(bpy.ops.mesh.primitive_ico_sphere_add, radius=0.25))
 
 
 with xfm.color(color=(0, 1, 1, 1)):
