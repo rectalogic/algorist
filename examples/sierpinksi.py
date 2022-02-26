@@ -25,14 +25,22 @@ def sierpinksi(depth=0):
             sierpinksi(depth + 1)
 
     if depth > 4:
-        xfm.apply(ctx.mesh.cone(radius1=side / 2, depth=height))
+        xfm.apply(
+            ctx.mesh.ops_primitive(
+                bpy.ops.mesh.primitive_cone_add, radius1=side / 2, depth=height
+            )
+        )
 
 
 with xfm.color(color=(0.048, 0.5, 0.3, 1)), xfm.scale(xyz=2):
     sierpinksi()
 
 with xfm.color(color=(0.114, 0.77, 0.8, 1)), xfm.translate(z=-1):
-    xfm.apply(ctx.mesh.circle(radius=100, fill_type="NGON"))
+    xfm.apply(
+        ctx.mesh.ops_primitive(
+            bpy.ops.mesh.primitive_circle_add, radius=100, fill_type="NGON"
+        )
+    )
 
 bpy.context.scene.camera.matrix_world = Matrix(
     (

@@ -11,6 +11,7 @@ if ta.TYPE_CHECKING:
 
 
 def create_color_material(color: Color) -> bpy.types.Material:
+    """Create a Principled BSDF Material with Base Color set to RGBA Color"""
     material = bpy.data.materials.new("Color")
     material.use_nodes = True
     material.node_tree.nodes["Principled BSDF"].inputs[
@@ -23,4 +24,5 @@ def create_color_material(color: Color) -> bpy.types.Material:
 
 
 def hsva_to_rgba(color: Color) -> Color:
+    """Convert color from HSVA to RGBA"""
     return (*colorsys.hsv_to_rgb(*color[:3]), color[3])

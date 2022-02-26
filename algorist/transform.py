@@ -11,7 +11,7 @@ from mathutils import Matrix, Vector
 from .blender import create_color_material, hsva_to_rgba
 
 if ta.TYPE_CHECKING:
-    from .blender import Color
+    from .blender import Color, ColorComponent
 
 
 class Transform:
@@ -31,6 +31,9 @@ class Transform:
         z: ta.Optional[float] = None,
         xyz: float = 1.0,
     ):
+        """Scale specified dimension. xyz is a shortcut for scaling all
+        dimensions equally
+        """
         matrix = self._matrix
         self._matrix = self._matrix @ Matrix.Diagonal(
             (x or xyz, y or xyz, z or xyz, 1.0)
@@ -46,7 +49,8 @@ class Transform:
         self._matrix = matrix
 
     @contextmanager
-    def rotate(self, angle: float, axis: ta.Union[str, Vector]):
+    def rotate(self, angle: float, axis: ta.Union[ta.Literal["X", "Y", "Z"], Vector]):
+        """Rotate angle radians around axis"""
         matrix = self._matrix
         self._matrix = self._matrix @ Matrix.Rotation(angle, 4, axis)
         yield
@@ -63,12 +67,18 @@ class Transform:
     @contextmanager
     def color(
         self,
-        hue: ta.Optional[float] = None,
-        saturation: ta.Optional[float] = None,
-        value: ta.Optional[float] = None,
-        alpha: ta.Optional[float] = None,
+        hue: ta.Optional[ColorComponent] = None,
+        saturation: ta.Optional[ColorComponent] = None,
+        value: ta.Optional[ColorComponent] = None,
+        alpha: ta.Optional[ColorComponent] = None,
         color: ta.Optional[Color] = None,
     ):
+        """Transform color
+
+        If color is specified, it is used as the new base color
+        hue increments the hue value, and wraps around.
+        saturation, value and alpha are multipliers and clamp to 0..1
+        """
         current_color = self._color
         base_color = color or self._color
         self._color = (

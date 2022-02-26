@@ -8,6 +8,12 @@ _RULES: dict[str, list[tuple[float, ta.Callable]]] = {}
 
 
 def rule(weight=1.0):
+    """Create a function decorator to weight a rule
+
+    Multipke functions of the same name should be decorated -
+    they will be randomly called based on their relative weights.
+    """
+
     def decorator(func):
         name = func.__name__
 
