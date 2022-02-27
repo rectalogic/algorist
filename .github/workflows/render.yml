@@ -22,7 +22,7 @@ jobs:
         fi
         mkdir /tmp/renders
         for py in examples/*.py; do
-          ./algorist.sh $py --python .github/workflows/resolution.py --background --engine CYCLES --render-format PNG --use-extension 1 --render-output "/tmp/renders/$py.#" --render-frame 1 -- --cycles-device CPU
+          ./algorist.sh $py --python .github/workflows/resolution.py --background --engine CYCLES --render-format PNG --use-extension 1 --render-output "/tmp/renders/$(basename $py).#" --render-frame 1 -- --cycles-device CPU
         done
     - name: Upload renders
       if: ${{ github.event_name == 'workflow_dispatch' }}
