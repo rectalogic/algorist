@@ -14,15 +14,10 @@ jobs:
     - name: Install Blender
       run: |
         sudo snap install blender --channel=3.0/stable --classic
-    - name: Get branch
-      run: |
-        # Short name for current branch. For PRs, use target branch (base ref)
-        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
-        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
     - name: Render
       run: |
         # lowrez if we aren't publishing
-        if [ "{{ github.event_name }}" != "workflow_dispatch" ]; then
+        if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
           sed -i -e s/640/80/ -e s/360/45/ .github/workflows/resolution.py
         fi
         mkdir /tmp/renders
