@@ -1,10 +1,10 @@
 import logging
-from math import radians
+from math import pi, radians
 
 import bpy
 from mathutils import Matrix
 
-from algorist import MeshFactory, Transform, limit, prnd, rnd
+from algorist import MeshFactory, Transform, limit, prnd, rnd, rule
 
 log = logging.getLogger(__name__)
 
@@ -12,20 +12,43 @@ xfm = Transform()
 mf = MeshFactory()
 
 
+@rule()
+def grow():
+    with xfm.rotate(axis="X", angle=radians(5 + prnd(30))):
+        branch()
+
+
+@rule()  # type: ignore[no-redef]
+def grow():  # noqa: F811
+    with xfm.rotate(axis="X", angle=radians(-5 + -prnd(30))):
+        branch()
+
+
+@rule()  # type: ignore[no-redef]
+def grow():  # noqa: F811
+    with xfm.rotate(axis="Y", angle=radians(5 + prnd(30))):
+        branch()
+
+
+@rule()  # type: ignore[no-redef]
+def grow():  # noqa: F811
+    with xfm.rotate(axis="Y", angle=radians(-5 + -prnd(30))):
+        branch()
+
+
 @limit()
 def branch():
     xfm.apply(mf.cylinder(radius=0.1, depth=1))
-    with xfm.translate(z=0.7), xfm.scale(xyz=0.7 + rnd(0.15)), xfm.color(value=0.8):
-        with xfm.rotate(axis="X", angle=radians(5 + prnd(30))):
-            branch()
-        with xfm.rotate(axis="X", angle=radians(-5 - prnd(30))):
-            branch()
+    with xfm.translate(z=0.7), xfm.scale(xyz=0.7 + rnd(0.15)), xfm.color(
+        value=0.8
+    ), xfm.rotate(axis="Z", angle=2 * pi):
+        grow()
+        grow()
 
 
 with xfm.scale(x=3, y=3, z=3), xfm.color(color=(0, 1, 1, 1)):
     branch()
-    with xfm.rotate(axis="Z", angle=radians(90)):
-        branch()
+
 
 with xfm.color(color=(0, 0, 1, 1)):
     xfm.apply(mf.plane(size=100))
