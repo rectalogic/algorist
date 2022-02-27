@@ -1,5 +1,7 @@
 name: Render
-on: [push]
+on:
+  push:
+  workflow_dispatch:
 
 jobs:
   render:
@@ -19,23 +21,23 @@ jobs:
         echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
     - name: Render
       run: |
-        if [ "$GIT_BRANCH" != "master" ]; then
+        # lowrez if we aren't publishing
+        if [ "{{ github.event_name }}" != "workflow_dispatch" ]; then
           sed -i -e s/640/80/ -e s/360/45/ .github/workflows/resolution.py
         fi
         mkdir /tmp/renders
         for py in examples/*.py; do
-          hash=$(sha1sum $py | cut -d ' ' -f 1)
-          ./algorist.sh $py --python .github/workflows/resolution.py --background --engine CYCLES --render-format PNG --use-extension 1 --render-output "/tmp/renders/$(basename $py).#.$hash" --render-frame 1 -- --cycles-device CPU
+          ./algorist.sh $py --python .github/workflows/resolution.py --background --engine CYCLES --render-format PNG --use-extension 1 --render-output "/tmp/renders/$py.#" --render-frame 1 -- --cycles-device CPU
         done
     - name: Upload renders
-      if: env.GIT_BRANCH == 'master'
+      if: ${{ github.event_name == 'workflow_dispatch' }}
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
         git checkout gh-pages
         git clean -d -f
-        # Copy images unless they already exist (don't want to re-render images that have randomized contents)
-        rsync --recursive --ignore-existing --delete /tmp/renders/ renders/
+        rm -f renders/*
+        cp /tmp/renders/* renders/
         git add renders
         if git commit -m "new renders"; then
           git push
