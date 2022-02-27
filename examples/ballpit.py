@@ -1,9 +1,15 @@
+from __future__ import annotations
+
+import typing as ta
 from math import radians
 
 import bpy
 from mathutils import Matrix
 
-from algorist import MeshFactory, Transform, limit
+from algorist import MeshFactory, Transform, Transformer, limit
+
+if ta.TYPE_CHECKING:
+    from algorist import Color
 
 with bpy.data.libraries.load("examples/glassball.blend", relative=True) as (
     data_from,
@@ -16,15 +22,18 @@ with bpy.data.libraries.load("examples/glassball.blend", relative=True) as (
 sphere_prototype = bpy.data.objects["Sphere"]
 
 
+class GlassTransformer(Transformer):
+    def apply_color(self, color: Color):
+        material = self.obj.material_slots[0].material.copy()
+        self.obj.material_slots[0].material = material
+        material.node_tree.nodes["Glass BSDF"].inputs["Color"].default_value = color
+        self.obj.matrix_world = xfm.matrix
+
+
 def sphere():
     obj = sphere_prototype.copy()
-    material = obj.material_slots[0].material.copy()
-    obj.material_slots[0].material = material
-    material.node_tree.nodes["Glass BSDF"].inputs[
-        "Color"
-    ].default_value = xfm.color_rgba
-    obj.matrix_world = xfm.matrix
     bpy.context.collection.objects.link(obj)
+    return GlassTransformer(obj)
 
 
 xfm = Transform()
@@ -36,7 +45,7 @@ def pit(level=1):
     with xfm.color(hue=0.1):
         for angle in range(0, 360, int(360 / (level * 3.8))):
             with xfm.rotate(angle=radians(angle), axis="Z"), xfm.translate(x=level):
-                sphere()
+                xfm.apply(sphere())
         with xfm.translate(z=1.5):
             pit(level + 1)
 
@@ -51,7 +60,7 @@ with xfm.translate(z=-1):
         fill_type="NGON",
     )
     xfm.apply(circle)
-    node_tree = circle.material_slots[0].material.node_tree
+    node_tree = circle.obj.material_slots[0].material.node_tree
     checker = node_tree.nodes.new("ShaderNodeTexChecker")
     checker.inputs["Scale"].default_value = 25
     checker.inputs["Color1"].default_value = [0.800000, 0.226496, 0.029006, 1.000000]

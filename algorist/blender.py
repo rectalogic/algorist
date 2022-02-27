@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-import colorsys
 import functools
 import itertools
 import typing as ta
 
 import bpy
 
+from .transform import Transformer, hsva_to_rgba
+
 if ta.TYPE_CHECKING:
-    ColorComponent = ta.Annotated[float, ta.ValueRange(0.0, 1.0)]
-    Color = tuple[ColorComponent, ColorComponent, ColorComponent, ColorComponent]
+    from . import Color
 
 
 def _primitive_wrapper(func: ta.Callable, *args, **kwargs) -> bpy.types.Object:
@@ -17,9 +17,32 @@ def _primitive_wrapper(func: ta.Callable, *args, **kwargs) -> bpy.types.Object:
     return bpy.context.object
 
 
+class ColorMaterialTransformer(Transformer):
+    def apply_color(self, color: Color):
+        """Create a Principled BSDF Material with Base Color set to RGBA Color"""
+        if not self.obj.material_slots:
+            self.obj.data.materials.append(None)
+
+        material = bpy.data.materials.new("Color")
+        material.use_nodes = True
+        material.node_tree.nodes["Principled BSDF"].inputs[
+            "Base Color"
+        ].default_value = color
+        material.diffuse_color = color
+        if color[3] < 1:
+            material.blend_method = "BLEND"
+
+        # Link the material to the new object, not the shared mesh data
+        self.obj.material_slots[0].link = "OBJECT"
+        self.obj.material_slots[0].material = material
+
+
 class MeshFactory:
-    def __init__(self):
+    def __init__(
+        self, transformer_cls: ta.Type[Transformer] = ColorMaterialTransformer
+    ):
         self._mesh_cache: dict[tuple[str, tuple], bpy.types.Mesh] = {}
+        self.transformer_cls = transformer_cls
 
     def create(
         self,
@@ -27,7 +50,7 @@ class MeshFactory:
         creation_func: ta.Callable,
         *args,
         **kwargs,
-    ) -> bpy.types.Object:
+    ) -> Transformer:
         """Create blender mesh object
 
         name should be a unique name to use as a cache key for this mesh
@@ -50,7 +73,7 @@ class MeshFactory:
             else:
                 obj = bpy.context.object
             self._mesh_cache[meshkey] = obj.data
-        return obj
+        return self.transformer_cls(obj)
 
     torus = functools.partialmethod(create, "Torus", bpy.ops.mesh.primitive_torus_add)
     plane = functools.partialmethod(create, "Plane", bpy.ops.mesh.primitive_plane_add)
@@ -69,24 +92,6 @@ class MeshFactory:
         create, "Circle", bpy.ops.mesh.primitive_circle_add
     )
     cube = functools.partialmethod(create, "Cube", bpy.ops.mesh.primitive_cube_add)
-
-
-def create_color_material(color: Color) -> bpy.types.Material:
-    """Create a Principled BSDF Material with Base Color set to RGBA Color"""
-    material = bpy.data.materials.new("Color")
-    material.use_nodes = True
-    material.node_tree.nodes["Principled BSDF"].inputs[
-        "Base Color"
-    ].default_value = color
-    material.diffuse_color = color
-    if color[3] < 1:
-        material.blend_method = "BLEND"
-    return material
-
-
-def hsva_to_rgba(color: Color) -> Color:
-    """Convert color from HSVA to RGBA"""
-    return (*colorsys.hsv_to_rgb(*color[:3]), color[3])
 
 
 def background(color: Color):

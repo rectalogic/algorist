@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import abc
+import colorsys
 import math
 import typing as ta
 from contextlib import contextmanager
@@ -8,10 +10,8 @@ import bpy
 from bl_math import clamp
 from mathutils import Matrix, Vector
 
-from .blender import create_color_material, hsva_to_rgba
-
 if ta.TYPE_CHECKING:
-    from .blender import Color, ColorComponent
+    from . import Color, ColorComponent
 
 
 class Transform:
@@ -90,13 +90,31 @@ class Transform:
         yield
         self._color = current_color
 
-    def apply(self, obj: bpy.types.Object, create_material: bool = True):
-        obj.matrix_world = self._matrix
+    def apply(self, transformer: Transformer):
+        transformer.transform(self)
 
-        if create_material:
-            if not obj.material_slots:
-                obj.data.materials.append(None)
-            material = create_color_material(self.color_rgba)
-            # Link the material to the new object, not the shared mesh data
-            obj.material_slots[0].link = "OBJECT"
-            obj.material_slots[0].material = material
+
+class Transformer(abc.ABC):
+    def __init__(self, obj: bpy.types.Object):
+        self._obj = obj
+
+    @property
+    def obj(self) -> bpy.types.Object:
+        return self._obj
+
+    def transform(self, xfm: Transform):
+        self.apply_matrix(xfm.matrix)
+        self.apply_color(xfm.color_rgba)
+
+    def apply_matrix(self, matrix: Matrix):
+        """Apply transformation matrix to object"""
+        self.obj.matrix_world = matrix
+
+    @abc.abstractmethod
+    def apply_color(self, color: Color):
+        """Apply color to object"""
+
+
+def hsva_to_rgba(color: Color) -> Color:
+    """Convert color from HSVA to RGBA"""
+    return (*colorsys.hsv_to_rgb(*color[:3]), color[3])

@@ -12,13 +12,13 @@ xfm = Transform()
 mf = MeshFactory()
 
 
-@rule()
+@rule(2)
 def grow():
     with xfm.rotate(axis="X", angle=radians(5 + prnd(30))):
         branch()
 
 
-@rule()  # type: ignore[no-redef]
+@rule(2)  # type: ignore[no-redef]
 def grow():  # noqa: F811
     with xfm.rotate(axis="X", angle=radians(-5 + -prnd(30))):
         branch()
