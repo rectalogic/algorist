@@ -14,6 +14,7 @@ jobs:
     - name: Install Blender
       run: |
         sudo snap install blender --channel=3.0/stable --classic
+        sudo apt install xvfb
     - name: Render
       run: |
         # lowrez if we aren't publishing
@@ -21,9 +22,9 @@ jobs:
           sed -i -e s/640/80/ -e s/360/45/ .github/workflows/resolution.py
         fi
         mkdir /tmp/renders
-        for py in examples/*.py; do
+        xvfb-run bash -c 'for py in examples/*.py; do
           ./algorist.sh $py --python .github/workflows/resolution.py --background --engine CYCLES --render-format PNG --use-extension 1 --render-output "/tmp/renders/$(basename $py).#" --render-frame 1 -- --cycles-device CPU
-        done
+        done'
     - name: Upload renders
       if: ${{ github.event_name == 'workflow_dispatch' }}
       run: |

@@ -7,13 +7,13 @@ import logging
 import bpy
 from mathutils import Matrix
 
-from algorist import MeshFactory, Transform, limit, rule
+from algorist import ObjectFactory, Transform, limit, rule
 
 log = logging.getLogger(__name__)
 
 limitdepth = limit(max_depth=50)
 xfm = Transform()
-mf = MeshFactory()
+of = ObjectFactory()
 
 
 @rule()
@@ -25,7 +25,7 @@ def rule1():
     ), xfm.rotate(6, "Z"), xfm.translate(x=0.9):
         rule1()
     with xfm.scale(xyz=2):
-        xfm.apply(mf.ico_sphere(radius=0.25))
+        xfm.apply(of.ico_sphere(radius=0.25))
 
 
 @rule()  # type: ignore[no-redef]
@@ -37,7 +37,7 @@ def rule1():  # noqa: F811
     ), xfm.rotate(-6, "Z"), xfm.translate(x=0.9):
         rule1()
     with xfm.scale(xyz=2):
-        xfm.apply(mf.ico_sphere(radius=0.25))
+        xfm.apply(of.ico_sphere(radius=0.25))
 
 
 with xfm.color(color=(0, 1, 1, 1)):

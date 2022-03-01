@@ -3,12 +3,12 @@ from math import sqrt
 import bpy
 from mathutils import Matrix
 
-from algorist import MeshFactory, Transform, background, limit
+from algorist import ObjectFactory, Transform, background, limit
 
 background((0.025, 0.862, 0.193, 1))
 
 xfm = Transform()
-mf = MeshFactory()
+of = ObjectFactory()
 
 side = 2
 height = side * (sqrt(3) / 2)
@@ -27,14 +27,14 @@ def sierpinksi(depth=0):
             sierpinksi(depth + 1)
 
     if depth > 4:
-        xfm.apply(mf.cone(radius1=side / 2, depth=height))
+        xfm.apply(of.cone(radius1=side / 2, depth=height))
 
 
 with xfm.color(color=(0.048, 0.5, 0.3, 1)), xfm.scale(xyz=2):
     sierpinksi()
 
 with xfm.color(color=(0.114, 0.77, 0.8, 1)), xfm.translate(z=-1):
-    xfm.apply(mf.circle(radius=100, fill_type="NGON"))
+    xfm.apply(of.circle(radius=100, fill_type="NGON"))
 
 bpy.context.scene.camera.matrix_world = Matrix(
     (

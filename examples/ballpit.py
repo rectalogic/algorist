@@ -6,7 +6,7 @@ from math import radians
 import bpy
 from mathutils import Matrix
 
-from algorist import MeshFactory, Transform, Transformer, limit
+from algorist import ObjectFactory, ObjectTransformer, Transform, limit
 
 if ta.TYPE_CHECKING:
     from algorist import Color
@@ -22,12 +22,11 @@ with bpy.data.libraries.load("examples/glassball.blend", relative=True) as (
 sphere_prototype = bpy.data.objects["Sphere"]
 
 
-class GlassTransformer(Transformer):
+class GlassTransformer(ObjectTransformer):
     def apply_color(self, color: Color):
         material = self.obj.material_slots[0].material.copy()
         self.obj.material_slots[0].material = material
         material.node_tree.nodes["Glass BSDF"].inputs["Color"].default_value = color
-        self.obj.matrix_world = xfm.matrix
 
 
 def sphere():
@@ -37,7 +36,7 @@ def sphere():
 
 
 xfm = Transform()
-mf = MeshFactory()
+of = ObjectFactory()
 
 
 @limit()
@@ -55,7 +54,7 @@ with xfm.color(color=(0, 0.9, 1, 1)):
 
 
 with xfm.translate(z=-1):
-    circle = mf.circle(
+    circle = of.circle(
         radius=100,
         fill_type="NGON",
     )

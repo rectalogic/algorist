@@ -95,6 +95,22 @@ class Transform:
 
 
 class Transformer(abc.ABC):
+    """Base transformer, applies matrix but not color"""
+
+    def transform(self, xfm: Transform):
+        self.apply_matrix(xfm.matrix)
+        self.apply_color(xfm.color_rgba)
+
+    @abc.abstractmethod
+    def apply_matrix(self, matrix: Matrix):
+        """Apply transformation matrix to object"""
+
+    def apply_color(self, color: Color):
+        """Apply color to object"""
+        pass
+
+
+class ObjectTransformer(Transformer):
     def __init__(self, obj: bpy.types.Object):
         self._obj = obj
 
@@ -102,17 +118,9 @@ class Transformer(abc.ABC):
     def obj(self) -> bpy.types.Object:
         return self._obj
 
-    def transform(self, xfm: Transform):
-        self.apply_matrix(xfm.matrix)
-        self.apply_color(xfm.color_rgba)
-
     def apply_matrix(self, matrix: Matrix):
         """Apply transformation matrix to object"""
         self.obj.matrix_world = matrix
-
-    @abc.abstractmethod
-    def apply_color(self, color: Color):
-        """Apply color to object"""
 
 
 def hsva_to_rgba(color: Color) -> Color:

@@ -3,10 +3,10 @@
 import logging
 import typing as ta
 
-from .blender import MeshFactory, background
+from .blender import ObjectFactory, background
 from .decorator import limit, rule
 from .random import coinflip, prnd, rnd
-from .transform import Transform, Transformer
+from .transform import ObjectTransformer, Transform, Transformer
 
 if ta.TYPE_CHECKING:
     ColorComponent = ta.Annotated[float, ta.ValueRange(0.0, 1.0)]
