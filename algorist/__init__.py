@@ -3,7 +3,7 @@
 import logging
 import typing as ta
 
-from .blender import ObjectFactory, background
+from .blender import MeshMaterialTransformer, ObjectFactory, background
 from .decorator import limit, rule
 from .random import coinflip, prnd, rnd
 from .transform import ObjectTransformer, Transform, Transformer

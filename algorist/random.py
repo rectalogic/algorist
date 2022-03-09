@@ -11,7 +11,7 @@ def prnd(r: float) -> float:
     return random.random() * r
 
 
-def coinflip(sides: int) -> bool:
+def coinflip(sides: int = 2) -> bool:
     """returns true as if coin with `sides` sides is flipped"""
     coin = random.randint(0, sides - 1)
     return coin == 1
