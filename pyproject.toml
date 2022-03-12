@@ -3,7 +3,7 @@ name = "algorist"
 version = "0.0.1"
 
 [tool.black]
-target-version = ["py39"]
+target-version = ["py310"]
 
 [tool.isort]
 profile = "black"

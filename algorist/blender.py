@@ -48,7 +48,7 @@ class GreasePencilMaterialTransformer(Transformer):
     def apply_matrix(self, matrix: Matrix):
         for p in self.stroke.points:
             p.co = matrix @ p.co
-        self.stroke.line_width *= matrix.median_scale
+        self.stroke.line_width = int(self.stroke.line_width * matrix.median_scale)
 
     def apply_color(self, color: Color):
         material = bpy.data.materials.new("GPColor")

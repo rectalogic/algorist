@@ -13,7 +13,7 @@ jobs:
         fetch-depth: 0
     - name: Install Blender
       run: |
-        sudo snap install blender --channel=3.0/stable --classic
+        sudo snap install blender --channel=3.1/stable --classic
         sudo apt install xvfb
     - name: Render
       run: |
